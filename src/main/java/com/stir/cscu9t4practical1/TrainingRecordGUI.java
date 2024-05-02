@@ -1,11 +1,15 @@
 // GUI and main program for the Training Record
 package com.stir.cscu9t4practical1;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
-import javax.swing.*;
-import java.lang.Number;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
 public class TrainingRecordGUI extends JFrame implements ActionListener {
 
@@ -27,7 +31,8 @@ public class TrainingRecordGUI extends JFrame implements ActionListener {
     private JLabel labdist = new JLabel(" Distance (km):");
     private JButton addR = new JButton("Add");
     private JButton lookUpByDate = new JButton("Look Up");
-
+    private JButton removeEntry = new JButton("Remove");
+    private JButton findAllByDate = new JButton("Find All By Date");
     private TrainingRecord myAthletes = new TrainingRecord();
 
     private JTextArea outputArea = new JTextArea(5, 50);
@@ -36,7 +41,7 @@ public class TrainingRecordGUI extends JFrame implements ActionListener {
         TrainingRecordGUI applic = new TrainingRecordGUI();
     } // main
 
-    // set up the GUI 
+    // set up the GUI
     public TrainingRecordGUI() {
         super("Training Record");
         setLayout(new FlowLayout());
@@ -73,13 +78,27 @@ public class TrainingRecordGUI extends JFrame implements ActionListener {
         setSize(720, 200);
         setVisible(true);
         blankDisplay();
-
+        add(addR);
+        addR.addActionListener(this);
+        add(lookUpByDate);
+        lookUpByDate.addActionListener(this);
+        add(outputArea);
+        outputArea.setEditable(false);
+        add(removeEntry);
+        removeEntry.addActionListener(this);
+        
         // To save typing in new entries while testing, uncomment
         // the following lines (or add your own test cases)
         
+        //Add new button to GUI
+        add(findAllByDate);
+        findAllByDate.addActionListener(this); // Add action listener
+        setSize(720, 200);
+        setVisible(true);
+        blankDisplay();
     } // constructor
 
-    // listen for and respond to GUI events 
+    // listen for and respond to GUI events
     public void actionPerformed(ActionEvent event) {
         String message = "";
         if (event.getSource() == addR) {
@@ -88,13 +107,20 @@ public class TrainingRecordGUI extends JFrame implements ActionListener {
         if (event.getSource() == lookUpByDate) {
             message = lookupEntry();
         }
+        if (event.getSource() == findAllByDate){
+            // Placeholder message for FindAllByDate button
+            message = "Not implemented yet";
+        }
+        if (event.getSource() == removeEntry) {
+            message = removeEntry();
+        }
         outputArea.setText(message);
         blankDisplay();
     } // actionPerformed
 
     public String addEntry(String what) {
         String message = "Record added\n";
-        System.out.println("Adding "+what+" entry to the records");
+        System.out.println("Adding " + what + " entry to the records");
         String n = name.getText();
         int m = Integer.parseInt(month.getText());
         int d = Integer.parseInt(day.getText());
@@ -105,6 +131,18 @@ public class TrainingRecordGUI extends JFrame implements ActionListener {
         int s = Integer.parseInt(secs.getText());
         Entry e = new Entry(n, d, m, y, h, mm, s, km);
         myAthletes.addEntry(e);
+        outputArea.setText("Finding all entries for " + d + "/" + m + "/" + y + " ...");
+        message = myAthletes.getAllEntriesByDate(d, m, y);
+        boolean removed = myAthletes.removeEntry(n, d, m, y);
+        if (message.isEmpty()) {
+            message = "No entries found for " + d + "/" + m + "/" + y;
+
+            if (removed) {
+                message = "Entry removed successfully";
+            } else {
+                message = "No matching entry found to remove";
+            }
+        }
         return message;
     }
     
@@ -117,6 +155,25 @@ public class TrainingRecordGUI extends JFrame implements ActionListener {
         return message;
     }
 
+    public String removeEntry() {
+        String message;
+        String n = name.getText();
+        int m = Integer.parseInt(month.getText());
+        int d = Integer.parseInt(day.getText());
+        int y = Integer.parseInt(year.getText());
+    
+        boolean removed = myAthletes.removeEntry(n, d, m, y);
+        if (removed) {
+            message = "Entry removed successfully";
+        } else {
+            message = "No matching entry found to remove";
+        }
+    
+        // Clear input fields
+        blankDisplay();
+    
+        return message;
+    }
     public void blankDisplay() {
         name.setText("");
         day.setText("");
